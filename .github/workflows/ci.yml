@@ -1,0 +1,81 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+    - main
+    tags:
+    - "v*"
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: coursier/cache-action@v6.3
+    - uses: coursier/setup-action@v1.1.1
+      with:
+        jvm: 8
+    - name: Install libsodium (Linux)
+      if: runner.os == 'Linux'
+      run: sudo apt-get install -y libsodium-dev
+    - name: Update XCode version
+      if: runner.os == 'macOS'
+      # https://github.com/actions/virtual-environments/issues/2557
+      run: |
+        sudo xcode-select -s "/Applications/Xcode_12.5.app" || sudo xcode-select -s "/Applications/Xcode_12.3.app" || ( ls /Applications; exit 1 )
+        sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
+    - name: Run tests
+      run: ./mill -i __.test
+    - name: Build and publish locally
+      run: ./mill -i __.publishLocal
+    - name: List published files
+      shell: bash
+      run: find ~/.ivy2/local | sort
+    - name: Copy artifacts
+      run: ./mill -i __.jniCopyFilesTo artifacts/
+    - uses: actions/upload-artifact@v2.2.4
+      with:
+        name: artifacts
+        path: artifacts/
+        if-no-files-found: error
+        retention-days: 2
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          submodules: true
+      - uses: coursier/cache-action@v6.3
+      - uses: coursier/setup-action@v1.1.1
+        with:
+          jvm: 8
+      - name: Install libsodium (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y libsodium-dev
+      - uses: actions/download-artifact@v2
+        with:
+          name: artifacts
+          path: artifacts/
+      - run: .github/scripts/gpg-setup.sh
+        shell: bash
+        env:
+          PGP_SECRET: ${{ secrets.PGP_SECRET }}
+      - name: Release
+        run: ./mill -i publishSonatype __.publishArtifacts
+        env:
+          PGP_PASSWORD: ${{ secrets.PGP_PASSPHRASE }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
