@@ -5,21 +5,11 @@
 extern "C" {
 #endif
 
-/*
- * Class:     libsodiumjni_internal_SodiumApi
- * Method:    sodium_init
- * Signature: ()I
- */
 JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_sodium_1init
   (JNIEnv *env, jobject obj) {
     return sodium_init();
 }
 
-/*
- * Class:     libsodiumjni_internal_SodiumApi
- * Method:    crypto_box_seal
- * Signature: ([B[BJ[B)I
- */
 JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_crypto_1box_1seal
   (JNIEnv *env, jobject obj, jbyteArray cipher, jbyteArray msg, jlong msg_len, jbyteArray pub_key) {
 
