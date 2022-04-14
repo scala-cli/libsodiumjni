@@ -9,8 +9,7 @@ import scala.util.Properties
 
 trait GenerateHeaders extends JavaModule {
   def cDirectory = T {
-    val osDir = if (Properties.isWin) "win32" else "unix"
-    millSourcePath / "src" / "main" / "c" / osDir
+    millSourcePath / "src" / "main" / "c"
   }
   def javacOptions = T {
     val dest = cDirectory()
@@ -323,7 +322,7 @@ trait JniUnixModule extends Module {
   def unixLibName: T[String]
 
   def unixCSources = T.sources {
-    val mainDir = millSourcePath / "src" / "main" / "c" / "unix"
+    val mainDir = millSourcePath / "src" / "main" / "c"
     val isEmpty = !os.isDir(mainDir) || os.walk.stream(mainDir).filter(
       _.last.endsWith(".c")
     ).filter(os.isFile(_)).headOption.isEmpty
