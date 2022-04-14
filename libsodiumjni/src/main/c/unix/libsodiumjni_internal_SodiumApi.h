@@ -13,7 +13,7 @@ extern "C" {
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_sodium_1init
-  (JNIEnv *, jobject);
+  (JNIEnv *, jclass);
 
 /*
  * Class:     libsodiumjni_internal_SodiumApi
@@ -21,7 +21,7 @@ JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_sodium_1init
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_crypto_1box_1seal_1bytes
-  (JNIEnv *, jobject);
+  (JNIEnv *, jclass);
 
 /*
  * Class:     libsodiumjni_internal_SodiumApi
@@ -29,7 +29,7 @@ JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_crypto_1box_1seal_1b
  * Signature: ([B[BJ[B)I
  */
 JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_crypto_1box_1seal
-  (JNIEnv *, jobject, jbyteArray, jbyteArray, jlong, jbyteArray);
+  (JNIEnv *, jclass, jbyteArray, jbyteArray, jlong, jbyteArray);
 
 #ifdef __cplusplus
 }
