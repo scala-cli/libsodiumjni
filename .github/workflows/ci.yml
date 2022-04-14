@@ -21,9 +21,9 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v6.3
-    - uses: coursier/setup-action@v1.1.1
+    - uses: coursier/setup-action@v1.2.0-M3
       with:
-        jvm: 8
+        jvm: zulu:17
     - name: Install libsodium (Linux)
       if: runner.os == 'Linux'
       run: sudo apt-get install -y libsodium-dev
@@ -52,6 +52,7 @@ jobs:
   release:
     needs: test
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -59,9 +60,9 @@ jobs:
           fetch-depth: 0
           submodules: true
       - uses: coursier/cache-action@v6.3
-      - uses: coursier/setup-action@v1.1.1
+      - uses: coursier/setup-action@v1.2.0-M3
         with:
-          jvm: 8
+          jvm: zulu:17
       - name: Install libsodium (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get install -y libsodium-dev
