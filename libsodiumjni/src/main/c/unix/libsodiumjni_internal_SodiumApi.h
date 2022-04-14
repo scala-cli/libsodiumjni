@@ -17,6 +17,14 @@ JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_sodium_1init
 
 /*
  * Class:     libsodiumjni_internal_SodiumApi
+ * Method:    crypto_box_seal_bytes
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_crypto_1box_1seal_1bytes
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     libsodiumjni_internal_SodiumApi
  * Method:    crypto_box_seal
  * Signature: ([B[BJ[B)I
  */

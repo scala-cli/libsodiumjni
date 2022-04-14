@@ -10,6 +10,11 @@ JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_sodium_1init
     return sodium_init();
 }
 
+JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_crypto_1box_1seal_1bytes
+  (JNIEnv *env, jobject obj) {
+    return crypto_box_SEALBYTES;
+}
+
 JNIEXPORT jint JNICALL Java_libsodiumjni_internal_SodiumApi_crypto_1box_1seal
   (JNIEnv *env, jobject obj, jbyteArray cipher, jbyteArray msg, jlong msg_len, jbyteArray pub_key) {
 
