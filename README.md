@@ -2,9 +2,11 @@
 
 Minimal JNI bindings for libsodium
 
-This project provides JNI bindings for some libsodium methods.
+This project provides JNI bindings for some [libsodium](https://github.com/jedisct1/libsodium) methods.
 
 It's used by [Scala CLI](https://github.com/VirtusLab/scala-cli) to encode repository secrets about to be uploaded to GitHub via the GitHub API. For now, it only exposes libsodium methods that Scala CLI needs.
+
+The motivation for writing libsodiumjni, rathen than using any of the existing JNA-based bindings, is mainly using JNI rather than JNA to interface with libsodium, as JNI is supported from GraalVM native images, while JNA is not.
 
 ## Build
 
