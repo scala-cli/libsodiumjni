@@ -36,8 +36,8 @@ $ cs fetch --intransitive io.github.alexarchambault.tmp.libsodiumjni:libsodiumjn
 ## Adding support for new libsodium new methods
 
 Typical workflow:
-- add a `native` method in [`libsodiumjni/src/main/java/libsodiumjni/internal/SodiumApi.java`](https://github.com/scala-cli/libsodiumjni/blob/main/libsodiumjni/src/main/java/libsodiumjni/internal/SodiumApi.java)
-- run `./mill __.compile`, this should add a corresponding declaration in [`libsodiumjni/src/main/c/libsodiumjni_internal_SodiumApi.h`](https://github.com/scala-cli/libsodiumjni/blob/main/libsodiumjni/src/main/c/libsodiumjni_internal_SodiumApi.h)
+- add a `native` method in [`SodiumApi.java`](https://github.com/scala-cli/libsodiumjni/blob/main/libsodiumjni/src/main/java/libsodiumjni/internal/SodiumApi.java)
+- run `./mill __.compile`, this should add a corresponding declaration in [`libsodiumjni_internal_SodiumApi.h`](https://github.com/scala-cli/libsodiumjni/blob/main/libsodiumjni/src/main/c/libsodiumjni_internal_SodiumApi.h)
 - add an implementation for that declaration in `libsodiumjni_internal_SodiumApi.c` in the same directory
 - run `./mill __.compile` to ensure that the new C code compiles fine
 - use the newly added `native` method in [`Sodium.java`](https://github.com/scala-cli/libsodiumjni/blob/main/libsodiumjni/src/main/java/libsodiumjni/Sodium.java) say
