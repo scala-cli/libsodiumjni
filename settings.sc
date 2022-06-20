@@ -184,21 +184,26 @@ trait JniWindowsModule extends Module {
     Seq(PathRef(millSourcePath / "src" / "main" / "c"))
   }
 
-  def windowsCOptions    = T(Seq.empty[String])
   def windowsDllCOptions = T(Seq.empty[String])
+  def windowsLibCOptions = T(Seq.empty[String])
 
   def windowsBatInit     = T("")
 
-  def windowsCompile = T.persistent {
-    val destDir = T.ctx().dest / "obj"
-    val cFiles = windowsCSources().flatMap { dir =>
-      if (os.isDir(dir.path))
-        os.walk(dir.path)
+  private def windowsCompile0(
+    dest: os.Path,
+    sources: Seq[os.Path],
+    javaHome0: os.Path,
+    cOptions: Seq[String],
+    windowsBatInit: String
+  ): Seq[PathRef] = {
+    val destDir = dest / "obj"
+    val cFiles = sources.flatMap { dir =>
+      if (os.isDir(dir))
+        os.walk(dir)
           .filter(p => os.isFile(p) && p.last.endsWith(".c"))
       else
         Nil
     }
-    val javaHome0 = windowsJavaHome()
     for (f <- cFiles) yield {
       if (!os.exists(destDir))
         os.makeDir.all(destDir)
@@ -206,19 +211,39 @@ trait JniWindowsModule extends Module {
       val output      = destDir / s"${f.last.stripSuffix(".c")}.obj"
       val needsUpdate = !os.isFile(output) || os.mtime(output) < os.mtime(f)
       if (needsUpdate) {
-        val userOptions = windowsCOptions().map(v => "\"" + v + "\"").mkString(" ")
+        val userOptions = cOptions.map(v => "\"" + v + "\"").mkString(" ")
         val script =
           s"""@call "$vcvars"
              |if %errorlevel% neq 0 exit /b %errorlevel%
-             |${windowsBatInit()}
+             |$windowsBatInit
              |cl /I $q${javaHome0 / "include"}$q /I $q${javaHome0 / "include" / "win32"}$q /utf-8 $userOptions /c $q$f$q
              |""".stripMargin
-        val scriptPath = T.dest / "run-cl.bat"
+        val scriptPath = dest / "run-cl.bat"
         os.write.over(scriptPath, script.getBytes, createFolders = true)
         os.proc(scriptPath).call(cwd = destDir, stdout = os.Inherit)
       }
-      PathRef(output.resolveFrom(os.pwd))
+      PathRef(output)
     }
+  }
+
+  def windowsDllCompile = T.persistent {
+    windowsCompile0(
+      T.dest,
+      windowsCSources().map(_.path),
+      windowsJavaHome(),
+      windowsDllCOptions(),
+      windowsBatInit()
+    )
+  }
+
+  def windowsLibCompile = T.persistent {
+    windowsCompile0(
+      T.dest,
+      windowsCSources().map(_.path),
+      windowsJavaHome(),
+      windowsLibCOptions(),
+      windowsBatInit()
+    )
   }
 
   def windowsDll = T.persistent {
@@ -228,7 +253,7 @@ trait JniWindowsModule extends Module {
       os.makeDir.all(destDir)
     val dest     = destDir / s"$dllName0.dll"
     val relDest  = dest.relativeTo(os.pwd)
-    val objs     = windowsCompile()
+    val objs     = windowsDllCompile()
     val objsArgs = objs.map(o => o.path.relativeTo(os.pwd).toString).distinct
     val libsArgs = windowsLinkingLibs().map(l => l + ".lib")
     val needsUpdate = !os.isFile(dest) || {
@@ -252,7 +277,7 @@ trait JniWindowsModule extends Module {
 
   def windowsLib = T {
     val fileName    = windowsDllName() + ".lib"
-    val allObjFiles = windowsCompile().map(_.path)
+    val allObjFiles = windowsLibCompile().map(_.path)
     val output      = T.dest / fileName
     val libNeedsUpdate =
       !os.isFile(output) || allObjFiles.exists(f => os.mtime(output) < os.mtime(f))
